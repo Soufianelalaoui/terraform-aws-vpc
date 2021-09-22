@@ -114,6 +114,17 @@ resource "aws_instance" "instance" {
   key_name = aws_key_pair.deployer.key_name
 }
 
+resource "aws_instance" "instance-private" {
+  for_each = toset(var.vpc_azs)
+
+  ami = data.aws_ami.nat_ami.id
+  instance_type = "t2.micro"
+  source_dest_check = false
+  vpc_security_group_ids = [aws_security_group.allow_nat.id]
+  subnet_id = aws_subnet.private[each.value].id
+  key_name = aws_key_pair.deployer.key_name
+}
+
 resource "aws_eip" "eip" {
   for_each = toset(var.vpc_azs)
     vpc = true
