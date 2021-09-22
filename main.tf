@@ -115,3 +115,31 @@ resource "aws_eip_association" "eip_assoc" {
     instance_id   = aws_instance.instance[each.value].id
     allocation_id = aws_eip.eip[each.value].id
 }
+
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name = "public-route"
+  }
+}
+
+resource "aws_route_table" "private" {
+  for_each = toset(var.vpc_azs)
+    vpc_id = aws_vpc.vpc.id
+    tags = {
+      Name = "private-route-${each.value}"
+    }
+}
+
+resource "aws_route" "r-public" {
+  route_table_id            = aws_route_table.public.id
+  destination_cidr_block    = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.gw.id
+}
+
+resource "aws_route" "r-private" {
+  for_each = toset(var.vpc_azs)
+  route_table_id            = aws_route_table.private[each.value].id
+  destination_cidr_block    = "0.0.0.0/0"
+  instance_id = aws_instance.instance[each.value].id
+}
