@@ -143,3 +143,15 @@ resource "aws_route" "r-private" {
   destination_cidr_block    = "0.0.0.0/0"
   instance_id = aws_instance.instance[each.value].id
 }
+
+resource "aws_route_table_association" "private" {
+  for_each = toset(var.vpc_azs)
+  subnet_id      = aws_subnet.private[each.value].id
+  route_table_id = aws_route_table.private[each.value].id
+}
+
+resource "aws_route_table_association" "public" {
+  for_each = toset(var.vpc_azs)
+  subnet_id    = aws_subnet.public[each.value].id
+  route_table_id = aws_route_table.public.id
+}
