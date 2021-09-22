@@ -101,4 +101,17 @@ resource "aws_instance" "instance" {
   source_dest_check = false
   vpc_security_group_ids = [aws_security_group.allow_nat.id]
   subnet_id = aws_subnet.public[each.value].id
- }
+}
+
+resource "aws_eip" "eip" {
+  for_each = toset(var.vpc_azs)
+    vpc = true
+    instance                  = aws_instance.instance[each.value].id
+    depends_on                = [aws_internet_gateway.gw]
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  for_each = toset(var.vpc_azs)
+    instance_id   = aws_instance.instance[each.value].id
+    allocation_id = aws_eip.eip[each.value].id
+}
