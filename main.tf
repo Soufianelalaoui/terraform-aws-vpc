@@ -141,7 +141,7 @@ resource "aws_eip_association" "eip_assoc" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.vpc.id
   tags = {
-    Name = "public-route"
+    Name = "${var.vpc_name}-public"
   }
 }
 
@@ -149,7 +149,7 @@ resource "aws_route_table" "private" {
   for_each = toset(var.vpc_azs)
     vpc_id = aws_vpc.vpc.id
     tags = {
-      Name = "private-route-${each.value}"
+      Name = "${var.vpc_name}-private-${each.value}"
     }
 }
 
